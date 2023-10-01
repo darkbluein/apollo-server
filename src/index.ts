@@ -5,7 +5,11 @@ import helmet from 'helmet';
 
 import { ApolloServer } from 'apollo-server-express';
 import { createServer } from 'http';
-import { ApolloServerPluginDrainHttpServer, ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
+import {
+    ApolloServerPluginDrainHttpServer,
+    ApolloServerPluginLandingPageProductionDefault,
+    ApolloServerPluginLandingPageLocalDefault,
+} from 'apollo-server-core';
 import { InMemoryLRUCache } from '@apollo/utils.keyvaluecache';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { WebSocketServer } from 'ws';
@@ -20,7 +24,7 @@ const schema = makeExecutableSchema({ typeDefs, resolvers });
 
 require('dotenv').config();
 
-const PORT: any = process.env.PORT || 5000;
+const PORT: any = process.env.PORT || 5001;
 const DATABASE: string = process.env.MONGODB_CONNECTION_STRING;
 
 // Create an Express app and HTTP server; we will attach both the WebSocket
@@ -71,7 +75,12 @@ export async function startApolloServer() {
                     };
                 },
             },
-            ApolloServerPluginLandingPageLocalDefault({ embed: true }),
+            process.env.NODE_ENV === 'production'
+                ? ApolloServerPluginLandingPageProductionDefault({
+                      embed: true,
+                      graphRef: 'plaid-gufzoj@current',
+                  })
+                : ApolloServerPluginLandingPageLocalDefault({ embed: true }),
         ],
     });
 
@@ -81,7 +90,7 @@ export async function startApolloServer() {
 
     await new Promise(() =>
         httpServer.listen(PORT, () => {
-            console.log(`Server is now running on http://localhost:${PORT}${server.graphqlPath}`);
+            console.log(`Server is now running on http://127.0.0.1:${PORT}${server.graphqlPath}`);
         }),
     );
 }

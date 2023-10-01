@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { ObjectId } from 'bson';
-import { UserInputError, ValidationError, AuthenticationError } from 'apollo-server-express';
+import { UserInputError, ValidationError, AuthenticationError, ForbiddenError } from 'apollo-server-express';
 import { withFilter } from 'graphql-subscriptions';
 
 import Store from '../../../models/Store';
@@ -13,7 +13,7 @@ import { encodeUpi } from '../../../utils/upi';
 import { asyncForEach } from '../../../utils/generalUtil';
 import Geohash from '../../../geohash';
 import pubsub from '../../../pubsub';
-import { generateToken, generateRefreshToken } from '../../../utils/generalUtil';
+import { generateToken } from '../../../utils/generalUtil';
 import { IContactSchema, IProductSchema, IStoreUpdateSchema } from '../../../types';
 
 const STORE_UPDATE = 'STORE_UPDATE';
@@ -100,7 +100,7 @@ export default {
         async addAccount(_, { contact }: { contact: IContactSchema; orderId?: string }, req) {
             const { source } = checkAuthHeader(req);
 
-            if (source.startsWith('locality-store')) {
+            if (source.startsWith('X-Locality-Store')) {
                 const account = await Store.findOne({
                     'accounts.$.contact': contact,
                 });
@@ -115,6 +115,12 @@ export default {
             }
         },
         async editStore(_: any, { edit, storeInfo }: { edit: boolean; storeInfo: IStoreUpdateSchema }, req) {
+            const { source } = checkAuthHeader(req, true);
+
+            if (!source.startsWith('X-Locality-Store')) {
+                throw new ForbiddenError('Cannot access this endpoint');
+            }
+
             const data: IStoreUpdateSchema = { ...storeInfo };
 
             const geohash = Geohash.encode(
@@ -129,16 +135,26 @@ export default {
 
             try {
                 if (edit) {
-                    const { loggedUser, source } = checkAuthHeader(req);
+                    const { loggedUser } = checkAuthHeader(req);
 
-                    console.log(`Store ${loggedUser.id} changing details.`);
+                    const store = await Store.findById(loggedUser.id).exec();
 
-                    let enUpi;
+                    if (!store) {
+                        throw new AuthenticationError('Cannot find store to update');
+                    }
+
+                    console.log(`Store ${store.id} changing details.`);
+
+                    let enUpi: {
+                        value: string;
+                        display: string;
+                    };
+
                     if (data.upi) {
                         enUpi = encodeUpi(data.upi);
                     }
 
-                    const storeUpdate = await Store.updateOne(
+                    const storeUpdate = await Store.findByIdAndUpdate(
                         { _id: new ObjectId(loggedUser.id) },
                         {
                             $set: {
@@ -156,26 +172,25 @@ export default {
                                 'address.location.coordinates': data.address.location.coordinates,
                             },
                         },
+                        {
+                            returnDocument: 'after',
+                        },
                     );
 
-                    const res = await Store.findById(loggedUser.id);
-
-                    if (storeUpdate.modifiedCount) {
+                    if (storeUpdate) {
                         pubsub.publish(STORE_UPDATE, {
                             storeUpdate: {
-                                ...res._doc,
-                                id: res._id,
+                                ...storeUpdate._doc,
+                                id: storeUpdate.id,
                             },
                         });
 
                         return {
-                            ...res._doc,
-                            id: res._id,
+                            ...storeUpdate._doc,
+                            id: storeUpdate.id,
                         };
                     }
                 } else {
-                    // const { source } = checkAuthHeader(req, true);
-
                     const storeExists = await Store.findOne({
                         'contact.number': data.contact.number,
                     });
@@ -190,7 +205,7 @@ export default {
 
                     const enUpi = encodeUpi(data.upi);
 
-                    const newStore = new Store({
+                    const newStore = await new Store({
                         ...data,
                         meta: {
                             lastUpdated: new Date().toISOString(),
@@ -207,39 +222,36 @@ export default {
                                 coordinates: data.address.location.coordinates,
                             },
                         },
-                    });
-
-                    const res = await newStore.save();
+                    }).save();
 
                     const newInventory = new Inventory({
                         meta: {
-                            storeId: res._id,
+                            storeId: newStore.id,
                             lastUpdated: new Date().toISOString(),
                         },
                         products: [],
                     });
+
                     const resInv = await newInventory.save();
 
-                    console.log(`Store ${res._id} registered. Inventory ${resInv._id} assigned.`);
+                    console.log(`Store ${newStore.id} registered. Inventory ${resInv.id} assigned.`);
 
-                    const token = generateToken(res);
-                    const refreshToken = generateRefreshToken(res);
+                    const token = generateToken(newStore);
 
                     return {
-                        ...res._doc,
-                        id: res._id,
+                        ...newStore._doc,
+                        id: newStore.id,
                         token,
-                        refreshToken,
                     };
                 }
             } catch (err) {
-                throw err;
+                throw new UserInputError('Cannot perform operation');
             }
         },
         async addToInventory(_, { products }: { products: Array<IProductSchema> }, req) {
             const { loggedUser, source } = checkAuthHeader(req);
 
-            if (source.startsWith('locality-store')) {
+            if (source.startsWith('X-Locality-Store')) {
                 const inventory = await Inventory.findOne({
                     'meta.storeId': loggedUser.id,
                 });

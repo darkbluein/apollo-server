@@ -10,7 +10,7 @@ import { validateRegisterInput, validateLoginInput } from '../../../utils/valida
 import { checkAuthHeader } from '../../../utils/checkAuth';
 import { getFeedProducts } from '../../../functions/inventories';
 import { cleanupAddresses } from '../../../functions/users';
-import { generateOTP, generateRefreshToken, generateToken, addMinutesToDate } from '../../../utils/generalUtil';
+import { generateOTP, generateToken, addMinutesToDate } from '../../../utils/generalUtil';
 import { findNearbyStores } from '../../../brain';
 import { twclient } from '../../../twilio';
 import { client } from '../../../redis';
@@ -97,7 +97,7 @@ export default {
 
             let user = null;
 
-            if (source.startsWith('locality-store')) {
+            if (source.startsWith('X-Locality-Store')) {
                 // find better test function
                 if (contact.number === process.env.GOOGLE_PLAY_STORE_TEST_NUMBER) {
                     client.set(contact.number, process.env.GOOGLE_PLAY_STORE_TEST_CODE).then((res: any) => {
@@ -163,7 +163,7 @@ export default {
                 if (process.env.NODE_ENV === 'production') {
                     twclient.messages
                         .create({
-                            body: `<#> ${otp} is your locality verification code. It expires in about 1 minute.`,
+                            body: `${otp} is your locality verification code. It expires in about 1 minute.`,
                             messagingServiceSid,
                             to: `${contact.ISD}${contact.number}`,
                         })
@@ -220,7 +220,7 @@ export default {
                 throw new UserInputError('Errors', { errors });
             }
 
-            if (source.startsWith('locality-store')) {
+            if (source.startsWith('X-Locality-Store')) {
                 const store = await Store.findOne({
                     'contact.number': contact.number,
                 });
@@ -231,14 +231,12 @@ export default {
                 }
 
                 const token = generateToken(store);
-                const refreshToken = generateRefreshToken(store);
 
                 pubsub.publish(STORE_UPDATE, {
                     userUpdate: {
                         ...store._doc,
                         id: store._id,
                         token,
-                        refreshToken,
                     },
                 });
 
@@ -246,9 +244,8 @@ export default {
                     ...store._doc,
                     id: store._id,
                     token,
-                    refreshToken,
                 };
-            } else if (source.startsWith('locality-user')) {
+            } else if (source.startsWith('X-Locality-User')) {
                 const user = await User.findOne({
                     'contact.number': contact.number,
                 });
@@ -259,14 +256,12 @@ export default {
                 }
 
                 const token = generateToken(user);
-                const refreshToken = generateRefreshToken(user);
 
                 pubsub.publish(USER_UPDATE, {
                     userUpdate: {
                         ...user._doc,
                         id: user._id,
                         token,
-                        refreshToken,
                     },
                 });
 
@@ -274,7 +269,6 @@ export default {
                     ...user._doc,
                     id: user._id,
                     token,
-                    refreshToken,
                 };
             } else {
                 errors.general = 'User not found';
@@ -315,14 +309,12 @@ export default {
             console.log(`User ${res._id} registered.`);
 
             const token = generateToken(res);
-            const refreshToken = generateRefreshToken(res);
 
             pubsub.publish(USER_UPDATE, {
                 userUpdate: {
                     ...res._doc,
                     id: res._id,
                     token,
-                    refreshToken,
                 },
             });
 
@@ -330,7 +322,6 @@ export default {
                 ...res._doc,
                 id: res._id,
                 token,
-                refreshToken,
             };
         },
         async deleteAccount(_: any, {}, req: any) {
@@ -338,13 +329,13 @@ export default {
 
             const id = source.split('-')[2];
 
-            if (source.startsWith('locality-store')) {
+            if (source.startsWith('X-Locality-Store')) {
                 const storeDeleted = await Store.deleteOne({
                     _id: id,
                 });
 
                 return storeDeleted.deletedCount ? true : false;
-            } else if (source.startsWith('locality-user')) {
+            } else if (source.startsWith('X-Locality-User')) {
                 const userDeleted = await User.deleteOne({
                     _id: loggedUser.id,
                 });

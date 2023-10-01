@@ -23,7 +23,7 @@ export default {
         async getInventory(_, {}, req) {
             const { loggedUser, source } = checkAuthHeader(req);
 
-            if (source.startsWith('locality-store')) {
+            if (source.startsWith('X-Locality-Store')) {
                 const inventory = await Inventory.findOne({
                     'meta.storeId': loggedUser.id,
                 });
@@ -38,7 +38,7 @@ export default {
         async getProduct(_: any, { storeId, barcode }: { storeId: string; barcode: string }, req) {
             const { source } = checkAuthHeader(req, true);
 
-            if (source.startsWith('locality-store')) {
+            if (source.startsWith('X-Locality-Store')) {
                 // check if product exists in store
                 const inventory = await Inventory.findOne({ 'meta.storeId': storeId });
 
@@ -59,7 +59,7 @@ export default {
                         inStore: false,
                     };
                 }
-            } else if (source.startsWith('locality-user')) {
+            } else if (source.startsWith('X-Locality-User')) {
                 throw new Error('User not authorized to acces this route');
             }
 
@@ -84,7 +84,7 @@ export default {
             if (products) {
                 console.log(`${loggedUser.id} looked up ${name} in Store${storeId ? ' ' + storeId : ''}`);
 
-                if (source.startsWith('locality-store')) {
+                if (source.startsWith('X-Locality-Store')) {
                     const inventory = await Inventory.findOne({
                         'meta.storeId': loggedUser.id,
                     });

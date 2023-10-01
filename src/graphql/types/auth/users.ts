@@ -7,8 +7,7 @@ export default gql`
         contact: ContactType!
         deliveryAddresses: [UserAddress]
         meta: MetaType
-        token: String!
-        refreshToken: String!
+        token: String
     }
     type ContactType {
         ISD: String

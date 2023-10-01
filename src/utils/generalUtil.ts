@@ -48,16 +48,6 @@ function generateToken(user: IUserTokenSchema) {
     );
 }
 
-function generateRefreshToken(user: IUserTokenSchema) {
-    return jwt.sign(
-        {
-            id: user.id,
-            contact: user.contact,
-        },
-        process.env.REFRESH_TOKEN_SECRET,
-    );
-}
-
 function addMinutesToDate(objDate: number, intMinutes: number) {
     const numberOfMlSeconds = objDate;
     const addMlSeconds = intMinutes * 60000;
@@ -76,4 +66,4 @@ function randomizeArray(array: Array<IProductSchema>, lim: number) {
     return c;
 }
 
-export { log, asyncForEach, generateToken, generateOTP, generateRefreshToken, addMinutesToDate, randomizeArray };
+export { log, asyncForEach, generateToken, generateOTP, addMinutesToDate, randomizeArray };

@@ -48,7 +48,7 @@ export default {
 
             let orders: Array<IOrderSchema>;
 
-            if (source.startsWith('locality-store')) {
+            if (source.startsWith('X-Locality-Store')) {
                 console.log(`Store ${loggedUser.id} requesting all orders.`);
                 orders = await Order.find({
                     'meta.storeId': loggedUser.id,
@@ -58,7 +58,7 @@ export default {
                     .sort({
                         'state.created.date': -1,
                     });
-            } else if (source.startsWith('locality-user')) {
+            } else if (source.startsWith('X-Locality-User')) {
                 console.log(`User ${loggedUser.id} requesting all orders.`);
                 orders = await Order.find({ 'meta.userId': loggedUser.id }).limit(limit).sort({
                     'state.created.date': -1,
@@ -144,7 +144,7 @@ export default {
                 },
             };
 
-            if (source.startsWith('locality-store')) {
+            if (source.startsWith('X-Locality-Store')) {
                 console.log(`Store ${loggedUser.id} requesting to register an order.`);
 
                 const newOrder = new Order({
@@ -188,7 +188,7 @@ export default {
                     ...res._doc,
                     id: res._id,
                 };
-            } else if (source.startsWith('locality-user')) {
+            } else if (source.startsWith('X-Locality-User')) {
                 console.log(`User ${loggedUser.id} requesting to register an order.`);
 
                 if (data.delivery) {
@@ -254,7 +254,7 @@ export default {
         ) {
             const { loggedUser, source } = checkAuthHeader(req);
 
-            if (source.startsWith('locality-store')) {
+            if (source.startsWith('X-Locality-Store')) {
                 if (accepted) {
                     console.log(`Store ${loggedUser.id} requesting to accept order ${id}`);
 
@@ -442,7 +442,7 @@ export default {
                         }
                     }
                 }
-            } else if (source.startsWith('locality-user')) {
+            } else if (source.startsWith('X-Locality-User')) {
                 console.log(`User ${loggedUser.id} requesting to cancel order ${id}`);
 
                 const order_ = await Order.updateOne(
@@ -473,7 +473,7 @@ export default {
         async dispatchOrder(_, { id }, req) {
             const { loggedUser, source } = checkAuthHeader(req);
 
-            if (source.startsWith('locality-user')) {
+            if (source.startsWith('X-Locality-User')) {
                 throw new AuthenticationError('User not authorised.');
             }
 
@@ -534,7 +534,7 @@ export default {
         ) {
             const { loggedUser, source } = checkAuthHeader(req);
 
-            if (source.startsWith('locality-user')) {
+            if (source.startsWith('X-Locality-User')) {
                 throw new AuthenticationError('User not authorised.');
             }
 
@@ -594,7 +594,7 @@ export default {
         async paymentStatus(_, { id, method }: { id: string; method: string }, req) {
             const { loggedUser, source } = checkAuthHeader(req);
 
-            if (source.startsWith('locality-store')) {
+            if (source.startsWith('X-Locality-Store')) {
                 const orderUpdate = await Order.updateOne(
                     {
                         _id: new ObjectId(id),
@@ -647,7 +647,7 @@ export default {
                 }
 
                 return orderUpdate.modifiedCount ? true : false;
-            } else if (source.startsWith('locality-user')) {
+            } else if (source.startsWith('X-Locality-User')) {
                 throw new AuthenticationError('User cannot change payment status');
             }
 
@@ -660,7 +660,7 @@ export default {
         ) {
             const { loggedUser, source } = checkAuthHeader(req);
 
-            if (source.startsWith('locality-store')) {
+            if (source.startsWith('X-Locality-Store')) {
                 const order = await Order.findById(orderId);
                 const store = await Store.findById(loggedUser.id);
 

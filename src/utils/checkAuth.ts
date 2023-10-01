@@ -5,6 +5,7 @@ import { IUserTokenSchema } from './generalUtil';
 
 const checkAuthHeader = (context: any, sourceCheck?: boolean) => {
     const source: string = context.req.headers.source;
+
     if (sourceCheck) {
         return { loggedUser: null, source };
     }

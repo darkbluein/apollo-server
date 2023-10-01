@@ -11,7 +11,6 @@ export default gql`
         address: StoreAddress
         accounts: [StoreAccount]
         token: String
-        refreshToken: String
     }
     type Upi {
         value: String
@@ -49,7 +48,6 @@ export default gql`
         lastUpdated: String
     }
     type StoreAddress {
-        id: ID!
         line: String
         location: PointType
     }
