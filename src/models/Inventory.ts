@@ -55,7 +55,7 @@ const inventoryProductSchema: Schema = new Schema(
 
 const inventorySchema: Schema = new Schema(
     {
-        id: {
+        _id: {
             type: String,
         },
         meta: {

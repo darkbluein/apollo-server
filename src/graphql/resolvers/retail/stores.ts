@@ -204,7 +204,11 @@ export default {
                         });
                     }
 
-                    const enUpi = encodeUpi(data.upi);
+                    let enUpi: { value: string; display: string } = { value: '', display: '' };
+
+                    if (data.upi) {
+                        enUpi = encodeUpi(data.upi);
+                    }
 
                     const newStore = await new Store({
                         _id: uniqueId(),
@@ -248,6 +252,7 @@ export default {
                     };
                 }
             } catch (err) {
+                console.log(err);
                 throw new UserInputError('Cannot perform operation');
             }
         },
