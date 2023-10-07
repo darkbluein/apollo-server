@@ -5,9 +5,6 @@ export interface IProduct extends IProductSchema {}
 
 const productSchema = new Schema(
     {
-        _id: {
-            type: String,
-        },
         brand: {
             type: String,
         },

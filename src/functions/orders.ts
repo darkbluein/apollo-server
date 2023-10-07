@@ -3,7 +3,7 @@ import { IOrderProductsSchema, IOrderSchema } from '../types';
 
 import { asyncForEach } from '../utils/generalUtil';
 
-export async function getOrderData({ data, user, inStore }: { data: any; user: any; inStore: boolean }) {
+async function getOrderData({ data, user, inStore }: { data: any; user: any; inStore: boolean }) {
     let products: Array<IOrderProductsSchema>;
     let grandAmount: string;
 
@@ -14,7 +14,7 @@ export async function getOrderData({ data, user, inStore }: { data: any; user: a
 
             if (p) {
                 products.push({
-                    id: p._id,
+                    id: p._id.toString(),
                     brand: p.brand,
                     name: p.name,
                     url: p.url,

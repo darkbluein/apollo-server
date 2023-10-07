@@ -115,7 +115,7 @@ export interface IProductSchema {
         count: string;
         type: string;
     };
-    barcode: string;
+    barcode?: string;
     price: IProductPriceSchema;
     ratings?: Array<number>;
 }

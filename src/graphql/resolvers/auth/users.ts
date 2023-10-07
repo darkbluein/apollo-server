@@ -79,7 +79,7 @@ export default {
             const user = await User.findById(loggedUser.id);
 
             if (user) {
-                return user;
+                return { ...user, id: user._id };
             } else {
                 throw new Error('User not found');
             }

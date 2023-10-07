@@ -1,5 +1,4 @@
 import bcrypt from 'bcryptjs';
-import { ObjectId } from 'bson';
 import { UserInputError, ValidationError, AuthenticationError, ForbiddenError } from 'apollo-server-express';
 import { withFilter } from 'graphql-subscriptions';
 

@@ -1,4 +1,3 @@
-import { ObjectId } from 'bson';
 import { AuthenticationError, UserInputError } from 'apollo-server-express';
 
 import Product from '../../../models/Product';
@@ -156,7 +155,7 @@ export default {
                 ).exec();
 
                 return {
-                    ...p,
+                    ...p._doc,
                     ...product,
                 };
             } else {
@@ -168,7 +167,7 @@ export default {
                 }).save();
 
                 return {
-                    ...p,
+                    ...p._doc,
                     id: p._id,
                 };
             }

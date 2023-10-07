@@ -1,4 +1,3 @@
-import { ObjectId } from 'bson';
 import { AuthenticationError } from 'apollo-server-express';
 
 import { withFilter } from 'graphql-subscriptions';
@@ -179,7 +178,7 @@ export default {
 
                 pubsub.publish(ORDER_UPDATE, {
                     orderUpdate: {
-                        ...res,
+                        ...res._doc,
                         id: res._id,
                     },
                 });
@@ -187,7 +186,7 @@ export default {
                 await updateInventory(data.products, data.storeId);
 
                 return {
-                    ...res,
+                    ...res._doc,
                     id: res._id,
                 };
             } else if (source.startsWith('X-Locality-User')) {
@@ -227,13 +226,13 @@ export default {
 
                 pubsub.publish(ORDER_UPDATE, {
                     orderUpdate: {
-                        ...res,
+                        ...res._doc,
                         id: res._id,
                     },
                 });
 
                 return {
-                    ...res,
+                    ...res._doc,
                     id: res._id,
                 };
             } else {
@@ -507,7 +506,7 @@ export default {
 
             pubsub.publish(ORDER_UPDATE, {
                 orderUpdate: {
-                    ...orderToUpdate,
+                    ...orderToUpdate._doc,
                     id: orderToUpdate._id,
                     state: {
                         ...orderToUpdate._doc.state,
@@ -574,7 +573,7 @@ export default {
 
                 pubsub.publish(ORDER_UPDATE, {
                     orderUpdate: {
-                        ...orderToUpdate,
+                        ...orderToUpdate._doc,
                         id: orderToUpdate._id,
                         state: {
                             ...orderToUpdate._doc.state,

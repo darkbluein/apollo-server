@@ -19,7 +19,8 @@ export async function updateInventory(products: Array<IOrderProductsSchema>, sto
         const i = inventoryProducts.findIndex((p) => p.id === product.id);
 
         if (i <= -1) {
-            const p = await Product.findById(product.id);
+            const p = await Product.findById(product.id).exec();
+
             newProducts.push({
                 ...p._doc,
                 id: p._id.toString(),
