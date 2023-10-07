@@ -5,16 +5,19 @@ export interface IOrder extends IOrderSchema, Document {}
 
 export const pointSchema = new Schema(
     {
+        _id: {
+            type: String,
+        },
         hash: {
             type: String,
             required: true,
         },
         coordinates: {
-            type: [String],
+            type: [String, String],
             required: true,
         },
     },
-    { _id: true },
+    { id: true },
 );
 
 const orderProductSchema = new Schema(
@@ -65,102 +68,111 @@ const orderProductSchema = new Schema(
     },
 );
 
-const orderSchema = new Schema({
-    meta: {
-        userId: {
+const orderSchema = new Schema(
+    {
+        _id: {
             type: String,
         },
-        storeId: {
-            type: String,
-            required: true,
-        },
-        rating: {
-            type: String,
-            required: false,
-        },
-        timeTaken: {
-            type: String,
-            required: false,
-        },
-    },
-    products: [orderProductSchema],
-    linkedAccount: {
-        type: String,
-    },
-    state: {
-        created: {
-            date: {
+        meta: {
+            userId: {
+                type: String,
+            },
+            storeId: {
                 type: String,
                 required: true,
             },
-        },
-        message: {
-            type: String,
-            default: 'Order processing',
-        },
-        order: {
-            cancelled: {
-                type: Boolean,
-                default: false,
-            },
-            accepted: {
-                type: Boolean,
-                default: false,
-            },
-            date: {
+            rating: {
                 type: String,
+                required: false,
+            },
+            timeTaken: {
+                type: String,
+                required: false,
             },
         },
-        delivery: {
-            toDeliver: {
-                type: Boolean,
-                required: true,
+        products: [orderProductSchema],
+        linkedAccount: {
+            type: String,
+        },
+        state: {
+            created: {
+                date: {
+                    type: String,
+                    required: true,
+                },
             },
-            address: {
-                line: {
+            message: {
+                type: String,
+                default: 'Order processing',
+            },
+            order: {
+                cancelled: {
+                    type: Boolean,
+                    default: false,
+                },
+                accepted: {
+                    type: Boolean,
+                    default: false,
+                },
+                date: {
                     type: String,
                 },
-                location: {
-                    type: pointSchema,
+            },
+            delivery: {
+                toDeliver: {
+                    type: Boolean,
+                    required: true,
+                },
+                address: {
+                    line: {
+                        type: String,
+                    },
+                    location: {
+                        type: pointSchema,
+                    },
+                },
+                deliverBy: {
+                    type: String,
+                },
+                delivered: {
+                    type: Boolean,
+                    default: false,
+                },
+                deliveredAt: {
+                    type: String,
+                },
+                dispatched: {
+                    type: Boolean,
+                    default: false,
+                },
+                dispatchedAt: {
+                    type: String,
                 },
             },
-            deliverBy: {
-                type: String,
-            },
-            delivered: {
-                type: Boolean,
-                default: false,
-            },
-            deliveredAt: {
-                type: String,
-            },
-            dispatched: {
-                type: Boolean,
-                default: false,
-            },
-            dispatchedAt: {
-                type: String,
-            },
-        },
-        payment: {
-            method: {
-                type: String,
-            },
-            paid: {
-                type: Boolean,
-            },
-            paymentId: {
-                type: String,
-            },
-            grandAmount: {
-                type: String,
-                required: true,
-            },
-            paidAt: {
-                type: String,
+            payment: {
+                method: {
+                    type: String,
+                },
+                paid: {
+                    type: Boolean,
+                },
+                paymentId: {
+                    type: String,
+                },
+                grandAmount: {
+                    type: String,
+                    required: true,
+                },
+                paidAt: {
+                    type: String,
+                },
             },
         },
     },
-});
+    {
+        id: true,
+        timestamps: true,
+    },
+);
 
 export default model<IOrderSchema>('Order', orderSchema);

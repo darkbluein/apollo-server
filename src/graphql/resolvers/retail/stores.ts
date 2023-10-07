@@ -15,6 +15,7 @@ import Geohash from '../../../geohash';
 import pubsub from '../../../pubsub';
 import { generateToken } from '../../../utils/generalUtil';
 import { IContactSchema, IProductSchema, IStoreUpdateSchema } from '../../../types';
+import { uniqueId } from '../../../utils/uuid';
 
 const STORE_UPDATE = 'STORE_UPDATE';
 const INVENTORY_UPDATE = 'INVENTORY_UPDATE';
@@ -155,7 +156,7 @@ export default {
                     }
 
                     const storeUpdate = await Store.findByIdAndUpdate(
-                        { _id: new ObjectId(loggedUser.id) },
+                        { _id: loggedUser.id },
                         {
                             $set: {
                                 name: data.name,
@@ -193,7 +194,7 @@ export default {
                 } else {
                     const storeExists = await Store.findOne({
                         'contact.number': data.contact.number,
-                    });
+                    }).exec();
 
                     if (storeExists) {
                         throw new UserInputError('Contact is taken', {
@@ -206,6 +207,7 @@ export default {
                     const enUpi = encodeUpi(data.upi);
 
                     const newStore = await new Store({
+                        _id: uniqueId(),
                         ...data,
                         meta: {
                             lastUpdated: new Date().toISOString(),
@@ -225,6 +227,7 @@ export default {
                     }).save();
 
                     const newInventory = new Inventory({
+                        _id: uniqueId(),
                         meta: {
                             storeId: newStore.id,
                             lastUpdated: new Date().toISOString(),
@@ -269,7 +272,7 @@ export default {
 
                     if (product.barcode && p.barcode.trim().length !== 0) {
                         await Product.updateOne(
-                            { _id: new ObjectId(product.id) },
+                            { _id: product.id },
                             {
                                 $set: {
                                     barcode: product.barcode,
@@ -303,7 +306,7 @@ export default {
 
                 await Store.updateOne(
                     {
-                        _id: new ObjectId(loggedUser.id),
+                        _id: loggedUser.id,
                     },
                     {
                         $set: {
@@ -314,7 +317,7 @@ export default {
 
                 pubsub.publish(INVENTORY_UPDATE, {
                     inventoryUpdate: {
-                        ...inventory._doc,
+                        ...inventory,
                         id: inventory._id,
                         meta: {
                             lastUpdated: new Date().toISOString(),
@@ -330,7 +333,6 @@ export default {
         },
         async verifyStore(_, { storeId, verified }: { storeId: string; verified: boolean }, req) {
             const { loggedUser } = checkAuthHeader(req);
-            console.log();
             console.log(`User ${loggedUser.id} requesting confirmation for order.`);
 
             /* checkforsuperuser 
@@ -343,10 +345,13 @@ export default {
       */
 
             const storeUpdate = await Store.updateOne(
-                { _id: new ObjectId(storeId) },
+                { _id: storeId },
                 {
                     'meta.verified': verified,
                     'meta.lastUpdated': new Date().toISOString(),
+                },
+                {
+                    returnDocument: 'after',
                 },
             );
 

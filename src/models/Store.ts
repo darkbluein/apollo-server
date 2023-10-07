@@ -1,5 +1,6 @@
 import { Schema, Document, model } from 'mongoose';
 import { IStoreSchema } from '../types';
+import { uniqueId } from '../utils/uuid';
 
 export interface IStore extends IStoreSchema, Document {}
 
@@ -94,50 +95,59 @@ const accountSchema = new Schema(
     },
 );
 
-const storeSchema = new Schema({
-    name: {
-        type: String,
-    },
-    contact: {
-        type: contactSchema,
-        required: true,
-    },
-    meta: {
-        verified: {
-            type: Boolean,
-            default: false,
-        },
-        closed: {
-            type: Boolean,
-            default: false,
-        },
-        lastUpdated: {
+const storeSchema = new Schema(
+    {
+        _id: {
             type: String,
         },
-    },
-    upi: {
-        value: {
+        name: {
             type: String,
         },
-        display: {
-            type: String,
-        },
-        lastUpdated: {
-            type: String,
-        },
-    },
-    address: {
-        line: {
-            type: String,
-        },
-        location: {
-            type: pointSchema,
+        contact: {
+            type: contactSchema,
             required: true,
         },
+        meta: {
+            verified: {
+                type: Boolean,
+                default: false,
+            },
+            closed: {
+                type: Boolean,
+                default: false,
+            },
+            lastUpdated: {
+                type: String,
+            },
+        },
+        upi: {
+            value: {
+                type: String,
+            },
+            display: {
+                type: String,
+            },
+            lastUpdated: {
+                type: String,
+            },
+        },
+        address: {
+            line: {
+                type: String,
+            },
+            location: {
+                type: pointSchema,
+                required: true,
+            },
+        },
+        accounts: {
+            type: [accountSchema],
+        },
     },
-    accounts: {
-        type: [accountSchema],
+    {
+        id: true,
+        timestamps: true,
     },
-});
+);
 
 export default model<IStore>('Store', storeSchema);

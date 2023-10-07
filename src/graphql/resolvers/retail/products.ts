@@ -6,6 +6,7 @@ import Inventory from '../../../models/Inventory';
 
 import { checkAuthHeader } from '../../../utils/checkAuth';
 import { IProductSchema } from '../../../types';
+import { uniqueId } from '../../../utils/uuid';
 
 const checkName = (name: string, str: string) => {
     const pattern = str
@@ -51,11 +52,19 @@ export default {
                     };
                 } else {
                     const product = await Product.findOne({ barcode });
+
+                    if (product) {
+                        return {
+                            product: {
+                                ...product._doc,
+                                id: product._id,
+                            },
+                            inStore: false,
+                        };
+                    }
+
                     return {
-                        product: {
-                            ...product._doc,
-                            id: product._id,
-                        },
+                        product: null,
                         inStore: false,
                     };
                 }
@@ -137,28 +146,30 @@ export default {
                 const p = await Product.findById(product.id);
 
                 await Product.updateOne(
-                    { _id: new ObjectId(product.id) },
+                    { _id: product.id },
                     {
-                        ...product,
+                        $set: {
+                            ...p,
+                            ...product,
+                        },
                     },
-                );
+                ).exec();
 
                 return {
-                    ...p._doc,
+                    ...p,
                     ...product,
                 };
             } else {
                 delete product.id;
 
-                const p = new Product({
+                const p = await new Product({
+                    id: uniqueId(),
                     ...product,
-                });
-
-                const res = await p.save();
+                }).save();
 
                 return {
-                    ...res._doc,
-                    id: res._id,
+                    ...p,
+                    id: p._id,
                 };
             }
         },

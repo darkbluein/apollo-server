@@ -35,8 +35,9 @@ export interface IInventorySchema {
 }
 
 interface IPointSchema {
+    _id?: string;
     hash: string;
-    coordinates: [string, string];
+    coordinates: string[];
 }
 
 interface IOrderProductsSchema {
@@ -120,7 +121,7 @@ export interface IProductSchema {
 }
 
 interface IContactSchema {
-    ISD: string;
+    ISD?: string;
     number: string;
 }
 
@@ -175,8 +176,8 @@ export interface IStoreUpdateSchema {
     accounts: Array<StoreAccountProps>;
 }
 
-interface IDeliverySchema extends Document {
-    _doc?: DocumentType;
+interface IDeliverySchema {
+    _id?: String;
     name?: string;
     line1?: string;
     location: IPointSchema;
@@ -186,7 +187,7 @@ export interface IUserSchema extends DocumentType {
     _doc: DocumentType;
     name?: string;
     contact: IContactSchema;
-    deliveryAddresses: Array<IDeliverySchema>;
+    deliveryAddresses: IDeliverySchema[];
     meta: {
         lastLogin: string;
         loginCount: number;

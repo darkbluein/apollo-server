@@ -53,21 +53,30 @@ const inventoryProductSchema: Schema = new Schema(
     },
 );
 
-const inventorySchema: Schema = new Schema({
-    meta: {
-        storeId: {
+const inventorySchema: Schema = new Schema(
+    {
+        id: {
             type: String,
-            required: true,
         },
-        lastUpdated: {
-            type: String,
-            required: true,
+        meta: {
+            storeId: {
+                type: String,
+                required: true,
+            },
+            lastUpdated: {
+                type: String,
+                required: true,
+            },
+        },
+        products: {
+            type: [inventoryProductSchema],
+            default: [],
         },
     },
-    products: {
-        type: [inventoryProductSchema],
-        default: [],
+    {
+        id: true,
+        timestamps: true,
     },
-});
+);
 
 export default model<IInventory>('Inventory', inventorySchema);

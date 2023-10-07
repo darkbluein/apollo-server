@@ -1,5 +1,4 @@
 import jwt from 'jsonwebtoken';
-import { Document } from 'mongoose';
 
 import { IContactSchema, IProductSchema } from '../types';
 
@@ -30,7 +29,7 @@ function generateOTP(n: number): string {
     return data;
 }
 
-export interface IUserTokenSchema extends Document {
+export interface IUserTokenSchema {
     id?: string;
     name?: string;
     contact: IContactSchema;
@@ -39,7 +38,7 @@ export interface IUserTokenSchema extends Document {
 function generateToken(user: IUserTokenSchema) {
     return jwt.sign(
         {
-            id: user._id,
+            id: user.id,
             name: user.name,
             contact: user.contact,
         },

@@ -1,10 +1,10 @@
 import { IDeliverySchema } from '../types';
 
-function cleanupAddresses(addresses: Array<IDeliverySchema>) {
+function cleanupAddresses(addresses: any[]) {
     const data = [];
     addresses.forEach((address) => {
         data.push({
-            ...address._doc,
+            ...address,
             id: address._id,
         });
     });

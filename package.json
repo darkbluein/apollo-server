@@ -56,10 +56,11 @@
         "jsonwebtoken": "^8.5.1",
         "latlon-geohash": "^2.0.0",
         "module-alias": "^2.2.3",
-        "mongoose": "^6.5.2",
+        "mongoose": "7.5.3",
         "morgan": "^1.10.0",
         "subscriptions-transport-ws": "^0.11.0",
         "twilio": "^3.80.1",
+        "uuid": "^9.0.1",
         "ws": "^8.9.0"
     }
 }

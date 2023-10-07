@@ -1,4 +1,3 @@
-import { ObjectId } from 'bson';
 import { withFilter } from 'graphql-subscriptions';
 import { UserInputError, AuthenticationError } from 'apollo-server-express';
 
@@ -15,6 +14,7 @@ import { findNearbyStores } from '../../../brain';
 import { twclient } from '../../../twilio';
 import { client } from '../../../redis';
 import pubsub from '../../../pubsub';
+import { uniqueId } from '../../../utils/uuid';
 
 import {
     IContactSchema,
@@ -259,14 +259,14 @@ export default {
 
                 pubsub.publish(USER_UPDATE, {
                     userUpdate: {
-                        ...user._doc,
+                        ...user,
                         id: user._id,
                         token,
                     },
                 });
 
                 return {
-                    ...user._doc,
+                    ...user,
                     id: user._id,
                     token,
                 };
@@ -298,6 +298,7 @@ export default {
             }
 
             const newUser = new User({
+                _id: uniqueId(),
                 ...userInfoInput,
                 meta: {
                     createdAt: new Date().toISOString(),
@@ -306,20 +307,20 @@ export default {
 
             const res = await newUser.save();
 
-            console.log(`User ${res._id} registered.`);
+            console.log(`User ${res.id} registered.`);
 
             const token = generateToken(res);
 
             pubsub.publish(USER_UPDATE, {
                 userUpdate: {
-                    ...res._doc,
+                    ...res,
                     id: res._id,
                     token,
                 },
             });
 
             return {
-                ...res._doc,
+                ...res,
                 id: res._id,
                 token,
             };
@@ -407,7 +408,7 @@ export default {
 
             pubsub.publish(USER_UPDATE, {
                 userUpdate: {
-                    ...res._doc,
+                    ...res,
                     id: res._id,
                     deliveryAddresses,
                 },
@@ -430,7 +431,7 @@ export default {
                 deliveryAddresses.splice(i, 1);
 
                 const user_ = await User.updateOne(
-                    { _id: new ObjectId(loggedUser.id) },
+                    { _id: loggedUser.id },
                     {
                         deliveryAddresses,
                     },
@@ -440,7 +441,7 @@ export default {
 
                 pubsub.publish(USER_UPDATE, {
                     userUpdate: {
-                        ...user._doc,
+                        ...user,
                         id: user._id,
                         deliveryAddresses: addresses,
                     },
@@ -470,7 +471,7 @@ export default {
 
             pubsub.publish(USER_UPDATE, {
                 userUpdate: {
-                    ...res._doc,
+                    ...res,
                     id: res._id,
                     deliveryAddresses,
                 },

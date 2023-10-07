@@ -27,6 +27,7 @@ import {
     ICreateOrderSchema,
     IAccountsSchema,
 } from '../../../types';
+import { uniqueId } from '../../../utils/uuid';
 
 export default {
     Query: {
@@ -148,6 +149,7 @@ export default {
                 console.log(`Store ${loggedUser.id} requesting to register an order.`);
 
                 const newOrder = new Order({
+                    _id: uniqueId(),
                     ...orderData,
                     state: {
                         ...orderData.state,
@@ -177,7 +179,7 @@ export default {
 
                 pubsub.publish(ORDER_UPDATE, {
                     orderUpdate: {
-                        ...res._doc,
+                        ...res,
                         id: res._id,
                     },
                 });
@@ -185,7 +187,7 @@ export default {
                 await updateInventory(data.products, data.storeId);
 
                 return {
-                    ...res._doc,
+                    ...res,
                     id: res._id,
                 };
             } else if (source.startsWith('X-Locality-User')) {
@@ -198,6 +200,7 @@ export default {
                 }
 
                 const newOrder = new Order({
+                    _id: uniqueId(),
                     ...orderData,
                     state: {
                         ...orderData.state,
@@ -224,13 +227,13 @@ export default {
 
                 pubsub.publish(ORDER_UPDATE, {
                     orderUpdate: {
-                        ...res._doc,
+                        ...res,
                         id: res._id,
                     },
                 });
 
                 return {
-                    ...res._doc,
+                    ...res,
                     id: res._id,
                 };
             } else {
@@ -259,7 +262,7 @@ export default {
                     console.log(`Store ${loggedUser.id} requesting to accept order ${id}`);
 
                     const order_ = await Order.updateOne(
-                        { _id: new ObjectId(id) },
+                        { _id: id },
                         {
                             $set: {
                                 'state.order.accepted': accepted,
@@ -305,7 +308,7 @@ export default {
                             const updatedRunningAccounts = accounts.push(updatedAccount);
 
                             const updatingRunningAccount = await Store.updateOne(
-                                { _id: new ObjectId(loggedUser.id) },
+                                { _id: loggedUser.id },
                                 {
                                     $set: {
                                         accounts: updatedRunningAccounts,
@@ -329,7 +332,7 @@ export default {
                                 ],
                             };
                             const updatingStore = await Store.updateOne(
-                                { _id: new ObjectId(loggedUser.id) },
+                                { _id: loggedUser.id },
                                 {
                                     $push: {
                                         accounts: newAccount,
@@ -353,7 +356,7 @@ export default {
                                         },
                                         data: {
                                             ...userAccount,
-                                            id: userAccount._id,
+                                            id: userAccount.id,
                                         },
                                     },
                                 });
@@ -383,7 +386,7 @@ export default {
 
                     if (nearbyStores[0]) {
                         const order_ = await Order.updateOne(
-                            { _id: new ObjectId(id) },
+                            { _id: id },
                             {
                                 $set: {
                                     'meta.storeId': nearbyStores[0].id,
@@ -406,7 +409,7 @@ export default {
                         }
                     } else {
                         const order_ = await Order.updateOne(
-                            { _id: new ObjectId(id) },
+                            { _id: id },
                             {
                                 $set: {
                                     'state.order.cancelled': true,
@@ -446,7 +449,7 @@ export default {
                 console.log(`User ${loggedUser.id} requesting to cancel order ${id}`);
 
                 const order_ = await Order.updateOne(
-                    { _id: new ObjectId(id) },
+                    { _id: id },
                     {
                         $set: {
                             'state.order.cancelled': cancel,
@@ -478,7 +481,7 @@ export default {
             }
 
             const orderToUpdate = await Order.findOne({
-                _id: new ObjectId(id),
+                _id: id,
                 'meta.storeId': loggedUser.id,
             });
 
@@ -492,7 +495,7 @@ export default {
 
             const orderUpdate = await Order.updateOne(
                 {
-                    _id: new ObjectId(id),
+                    _id: id,
                 },
                 {
                     $set: {
@@ -504,7 +507,7 @@ export default {
 
             pubsub.publish(ORDER_UPDATE, {
                 orderUpdate: {
-                    ...orderToUpdate._doc,
+                    ...orderToUpdate,
                     id: orderToUpdate._id,
                     state: {
                         ...orderToUpdate._doc.state,
@@ -539,7 +542,7 @@ export default {
             }
 
             const orderToUpdate = await Order.findOne({
-                _id: new ObjectId(id),
+                _id: id,
                 'meta.storeId': loggedUser.id,
             });
 
@@ -559,7 +562,7 @@ export default {
 
                 const orderUpdate = await Order.updateOne(
                     {
-                        _id: new ObjectId(id),
+                        _id: id,
                     },
                     {
                         $set: {
@@ -571,7 +574,7 @@ export default {
 
                 pubsub.publish(ORDER_UPDATE, {
                     orderUpdate: {
-                        ...orderToUpdate._doc,
+                        ...orderToUpdate,
                         id: orderToUpdate._id,
                         state: {
                             ...orderToUpdate._doc.state,
@@ -597,7 +600,7 @@ export default {
             if (source.startsWith('X-Locality-Store')) {
                 const orderUpdate = await Order.updateOne(
                     {
-                        _id: new ObjectId(id),
+                        _id: id,
                         'meta.storeId': loggedUser.id,
                     },
                     {
@@ -667,7 +670,7 @@ export default {
                 const date = new Date().toISOString();
 
                 await Order.updateOne(
-                    { _id: new ObjectId(order._id) },
+                    { _id: order.id },
                     {
                         $set: {
                             linkedAccount: accountId,
@@ -690,7 +693,7 @@ export default {
                         closed: false,
                         orders: [
                             {
-                                orderId: order._id,
+                                orderId: order.id,
                                 paid: false,
                                 date,
                                 amount: order.state.payment.grandAmount,
@@ -706,7 +709,7 @@ export default {
                     const newAccounts = [...accounts].concat(account);
 
                     const storeUpdate = await Store.updateOne(
-                        { _id: new ObjectId(loggedUser.id) },
+                        { _id: loggedUser.id },
                         {
                             $set: {
                                 accounts: newAccounts,
@@ -729,7 +732,7 @@ export default {
                         await asyncForEach(orders, async (order) => {
                             await Order.updateOne(
                                 {
-                                    _id: new ObjectId(order.orderId),
+                                    _id: order.orderId,
                                 },
                                 {
                                     'state.payment.paid': true,
@@ -763,11 +766,14 @@ export default {
                     const newAccounts = [...accounts].concat(updatedAccount);
 
                     const storeUpdate = await Store.updateOne(
-                        { _id: new ObjectId(loggedUser.id) },
+                        { _id: loggedUser.id },
                         {
                             $set: {
                                 accounts: newAccounts,
                             },
+                        },
+                        {
+                            returnDocument: 'after',
                         },
                     );
 
