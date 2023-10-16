@@ -38,7 +38,18 @@ async function getOrderData({ data, user, inStore }: { data: any; user: any; inS
             storeId: data.storeId,
         },
         state: {
-            method: data.method,
+            created: {
+                date: new Date().toISOString(),
+            },
+            message: 'Order sucessfully created',
+            order: {
+                cancelled: false,
+                accepteed: false,
+                date: new Date().toISOString(),
+            },
+            payment: {
+                method: data.method,
+            },
             delivery: {
                 toDeliver: data.delivery,
                 address: null,
@@ -52,7 +63,7 @@ async function getOrderData({ data, user, inStore }: { data: any; user: any; inS
         orderData.state.delivery.deliverBy = null;
     } else {
         orderData.state.payment.paid = false;
-        orderData.state.grandAmount.grandAmount = grandAmount;
+        orderData.state.payment.grandAmount = grandAmount;
     }
 
     return orderData;

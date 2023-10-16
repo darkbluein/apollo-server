@@ -51,7 +51,7 @@ interface IOrderProductsSchema {
 }
 
 export interface IOrderSchema {
-    _doc: DocumentType;
+    _doc?: DocumentType;
     meta: {
         userId?: string;
         storeId: string;
@@ -84,10 +84,10 @@ export interface IOrderSchema {
         };
         payment: {
             method: string;
-            paid: boolean;
-            paymentId: string;
-            grandAmount: string;
-            paidAt: string;
+            paid?: boolean;
+            paymentId?: string;
+            grandAmount?: string;
+            paidAt?: string;
         };
     };
 }

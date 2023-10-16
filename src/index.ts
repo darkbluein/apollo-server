@@ -23,6 +23,7 @@ import resolvers from './graphql/resolvers';
 const schema = makeExecutableSchema({ typeDefs, resolvers });
 
 require('dotenv').config();
+import 'module-alias/register';
 
 const PORT: any = process.env.PORT || 5001;
 const DATABASE: string = process.env.MONGODB_CONNECTION_STRING;

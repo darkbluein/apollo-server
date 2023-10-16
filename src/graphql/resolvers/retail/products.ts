@@ -139,7 +139,7 @@ export default {
     },
     Mutation: {
         async editProduct(_, { product }: { product: IProductSchema }, req) {
-            // const { loggedUser, source } = checkAuthHeader(req);
+            const { source } = checkAuthHeader(req, true);
 
             if (product.id) {
                 const p = await Product.findById(product.id);
@@ -162,7 +162,7 @@ export default {
                 delete product.id;
 
                 const p = await new Product({
-                    id: uniqueId(),
+                    _id: uniqueId(),
                     ...product,
                 }).save();
 

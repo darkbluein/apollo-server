@@ -105,6 +105,48 @@ export default {
 
             return deliveryTimes;
         },
+        async getMonthsOrders(_: any, {}, req) {
+            const { loggedUser, source } = checkAuthHeader(req);
+
+            // const page = query.pageNo || 1;
+
+            // const itemsPerPage = 10; // Number of items to show per page
+            // const skip = (page - 1) * itemsPerPage;
+
+            const currentDate = new Date();
+            const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+            const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+
+            const orders = await Order.aggregate([
+                {
+                    $match: {
+                        createdAt: {
+                            $gte: firstDayOfMonth, // Start of the desired month
+                            $lt: lastDayOfMonth, // Start of the next month
+                        },
+                    },
+                },
+                {
+                    $project: {
+                        dayOfMonth: { $dayOfMonth: '$createdAt' },
+                        totalOrders: 1,
+                        grandTotal: { $toInt: '$state.payment.grandAmount' },
+                    },
+                },
+                {
+                    $group: {
+                        _id: '$dayOfMonth', // Group by the day of the month
+                        numberOfOrders: { $sum: 1 }, // Count the number of orders
+                        amount: { $sum: '$grandTotal' }, // Sum of grandTotal
+                    },
+                },
+                {
+                    $sort: { _id: -1 }, // Sort by day of the month (ascending)
+                },
+            ]).exec();
+
+            return orders;
+        },
     },
     Mutation: {
         async createOrder(_: any, { orderInfo }: { orderInfo: ICreateOrderSchema }, req) {

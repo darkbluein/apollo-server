@@ -27,6 +27,7 @@ import {
 require('dotenv').config();
 
 const messagingServiceSid = process.env.TWILIO_MESSAGING_SID;
+// const twilioNumber = process.env.TWILIO_NUMBER;
 
 const USER_UPDATE = 'USER_UPDATE';
 const STORE_UPDATE = 'STORE_UPDATE';

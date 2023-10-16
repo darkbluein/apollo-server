@@ -4,8 +4,8 @@ const enc = new TextEncoder();
 
 const algo: CipherGCMTypes = 'aes-256-gcm';
 
-const inVec = enc.encode(process.env.TOKEN_SECRET.slice(0, 16)).buffer;
-const secKey = enc.encode(process.env.TOKEN_SECRET.slice(0, 32)).buffer;
+const inVec: any = enc.encode(process.env.TOKEN_SECRET.slice(0, 16)).buffer;
+const secKey: any = enc.encode(process.env.TOKEN_SECRET.slice(0, 32)).buffer;
 
 const encodeUpi = (upi: string) => {
     const cipherText = crypto.createCipheriv(algo, secKey, inVec);

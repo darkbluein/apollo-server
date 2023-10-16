@@ -71,6 +71,11 @@ export default gql`
         mrp: String!
         discount: String
     }
+    type OrderLog {
+        _id: String
+        amount: String
+        numberOfOrders: Int
+    }
     input OrderInputProduct {
         id: String!
         barcode: String
@@ -96,6 +101,7 @@ export default gql`
         getOrders(limit: Int!, offset: Int!): [Order]!
         getDeliveryTimes: [DeliveryTimes]
         getPaymentId: String!
+        getMonthsOrders: [OrderLog]
     }
     type Mutation {
         createOrder(orderInfo: OrderInfo): Order!

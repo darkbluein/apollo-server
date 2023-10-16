@@ -1,16 +1,28 @@
 {
     "compilerOptions": {
-      "target": "ES2018",
-      "module": "commonjs",
-      "outDir": "dist",
-      "sourceMap": true,
-      "skipLibCheck": true,
-      "esModuleInterop": true
+        "target": "ES2018",
+        "module": "commonjs",
+        "outDir": "dist",
+        "sourceMap": true,
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "baseUrl": "./src",
+        "moduleResolution": "node",
+        "paths": {
+            "@functions/*": ["functions/*"],
+            "@gqlresolvers/*": ["graphql/resolvers/*"],
+            "@gqltypes/*": ["graphql/types/*"],
+            "@models/*": ["models/*"],
+            "@types/*": ["types/*"],
+            "@utils/*": ["utils/*"],
+            "@redis": ["redis"],
+            "@brain": ["brain"],
+            "@twilio": ["twilio"],
+            "@db": ["db"],
+            "@geohash": ["geohash"],
+            "@pubsub": ["pubsub"]
+        }
     },
-    "include": [
-      "src/**/*.ts"
-    ],
-    "exclude": [
-      "node_modules"
-    ]
-  }
+    "include": ["src/**/*.ts"],
+    "exclude": ["node_modules"]
+}
