@@ -20,7 +20,7 @@ const checkName = (name: string, str: string) => {
 
 export default {
     Query: {
-        async getInventory(_, {}, req) {
+        async getInventory(_, { fetchCount }: { fetchCount: number }, req) {
             const { loggedUser, source } = checkAuthHeader(req);
 
             if (source.startsWith('X-Locality-Store')) {

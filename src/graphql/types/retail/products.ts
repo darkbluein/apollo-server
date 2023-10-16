@@ -64,7 +64,7 @@ export default gql`
     }
 
     type Query {
-        getInventory: Inventory!
+        getInventory(fetchCount: Int): Inventory!
         productRecommendations(storeId: String): [Product]
         getProduct(storeId: String!, barcode: String!): GetProduct
         # FIXME: Two queries of same Type
